@@ -1,0 +1,1 @@
+grub-mkrescue -o the_chosen_one.iso iso
