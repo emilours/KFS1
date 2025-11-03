@@ -47,12 +47,14 @@ iso: $(BIN)
 	./scripts/check_multiboot.sh
 # Creates a bootable ISO file that we can mount in a virtual machine (QEMU)
 #	grub-mkrescue -o $(ISO_NAME) $(ISO_PATH)
-	docker compose -f docker-compose.yaml up -d --build
+# compose waits for the container to finish building before proceeding and
+# --abort-on-container-exit stops all containers if one exits
+	docker compose -f docker-compose.yaml up --build --abort-on-container-exit
 
-run: ./scripts/$(ISO_NAME)
+run: iso
 #	sleep 5
 	$(CP) scripts/$(ISO_NAME) .
-	qemu-system-i386 -cdrom $<
+	qemu-system-i386 -cdrom $(ISO_NAME)
 
 clean:
 	$(RM) *.o $(BIN) *iso
