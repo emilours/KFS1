@@ -27,7 +27,8 @@ bootloader: boot.asm
 # -m32 ensures 32-bit compatibility with your bootloader
 # -c creates an object file (not an executable) since it needs special linking
 kernel: kernel.c
-	gcc -m32 -c kernel.c -o kernel.o
+# 	-fno-exceptions et -fno-rtti: only for c++
+	gcc -m32 -fno-builtin -fno-stack-protector -ffreestanding -nostdlib -nodefaultlibs -c kernel.c -o kernel.o
 
 # Linking everything together:
 # - Memory layout control: Kernels need to be loaded at specific memory addresses
