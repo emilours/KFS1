@@ -2,6 +2,10 @@ CP := cp
 RM := rm -rf
 MKDIR := mkdir -pv
 
+#Use a cross-compiler for i386 target
+CC := gcc
+CFLAGS := -m32 -std=gnu99 -O2 -ffreestanding -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Wall -Wextra -c
+
 BIN = kernel
 CFG = grub.cfg
 ISO_PATH := iso
@@ -27,17 +31,18 @@ bootloader: boot.asm
 # - Contains your actual kernel logic (memory management, process handling, etc.)
 # -m32 ensures 32-bit compatibility with your bootloader
 # -c creates an object file (not an executable) since it needs special linking
-kernel: kernel.c
-# 	-fno-exceptions et -fno-rtti: only for c++
-	gcc -m32 -fno-builtin -fno-stack-protector -ffreestanding -nostdlib -nodefaultlibs -c kernel.c -o kernel.o
+kernel: kernel_dir/kernel.c kernel_dir/drivers/screen.c kernel_dir/lib/string.c
+	$(CC) $(CFLAGS) kernel_dir/kernel.c -o kernel.o
+	$(CC) $(CFLAGS) kernel_dir/drivers/screen.c -o screen.o
+	$(CC) $(CFLAGS) kernel_dir/lib/string.c -o string.o
 
 # Linking everything together:
 # - Memory layout control: Kernels need to be loaded at specific memory addresses
 # - Section ordering: Bootloader code must come first, kernel code after
 # - No standard library: Regular executables expect libc, kernels run bare metal
 # - Custom entry point: could be main() or wherever your bootloader jumps
-linker: linker.ld boot.o kernel.o
-	ld -m elf_i386 -T linker.ld -o kernel boot.o kernel.o
+linker: linker.ld boot.o kernel.o screen.o string.o
+	ld -m elf_i386 -T linker.ld -o $(BIN) boot.o kernel.o screen.o string.o
 
 # Create a bootable ISO image using GRUB
 iso: $(BIN)
