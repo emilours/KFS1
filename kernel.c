@@ -21,6 +21,7 @@ void clear_screen(void)
     }
 }
 
+// changer pour implementer strlen et strcmp
 void print_string(char *str, unsigned char color)
 {
     int index = 0;

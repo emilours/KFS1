@@ -8,6 +8,7 @@ ISO_PATH := iso
 ISO_NAME := the_chosen_one.iso
 BOOT_PATH := $(ISO_PATH)/boot
 GRUB_PATH := $(BOOT_PATH)/grub
+DOCKER_CONTAINER := kfs_isobuilder
 
 .PHONY: all clean bootloader kernel linker iso run fclean re
 all: bootloader kernel linker iso run
@@ -27,7 +28,8 @@ bootloader: boot.asm
 # -m32 ensures 32-bit compatibility with your bootloader
 # -c creates an object file (not an executable) since it needs special linking
 kernel: kernel.c
-	gcc -m32 -c kernel.c -o kernel.o
+# 	-fno-exceptions et -fno-rtti: only for c++
+	gcc -m32 -fno-builtin -fno-stack-protector -ffreestanding -nostdlib -nodefaultlibs -c kernel.c -o kernel.o
 
 # Linking everything together:
 # - Memory layout control: Kernels need to be loaded at specific memory addresses
@@ -48,11 +50,11 @@ iso: $(BIN)
 # Creates a bootable ISO file that we can mount in a virtual machine (QEMU)
 #	grub-mkrescue -o $(ISO_NAME) $(ISO_PATH)
 	docker compose -f docker-compose.yaml up -d --build
+	docker wait $(DOCKER_CONTAINER)
 
-run: ./scripts/$(ISO_NAME)
-#	sleep 5
+run: iso
 	$(CP) scripts/$(ISO_NAME) .
-	qemu-system-i386 -cdrom $<
+	qemu-system-i386 -cdrom $(ISO_NAME)
 
 clean:
 	$(RM) *.o $(BIN) *iso
