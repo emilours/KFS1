@@ -53,7 +53,6 @@ iso: $(BIN)
 	docker wait $(DOCKER_CONTAINER)
 
 run: iso
-#	sleep 5
 	$(CP) scripts/$(ISO_NAME) .
 	qemu-system-i386 -cdrom $(ISO_NAME)
 
