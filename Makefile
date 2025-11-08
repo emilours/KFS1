@@ -8,6 +8,7 @@ ISO_PATH := iso
 ISO_NAME := the_chosen_one.iso
 BOOT_PATH := $(ISO_PATH)/boot
 GRUB_PATH := $(BOOT_PATH)/grub
+DOCKER_CONTAINER := kfs_isobuilder
 
 .PHONY: all clean bootloader kernel linker iso run fclean re
 all: bootloader kernel linker iso run
@@ -48,9 +49,9 @@ iso: $(BIN)
 # Creates a bootable ISO file that we can mount in a virtual machine (QEMU)
 #	grub-mkrescue -o $(ISO_NAME) $(ISO_PATH)
 	docker compose -f docker-compose.yaml up -d --build
+	docker wait $(DOCKER_CONTAINER)
 
 run: ./scripts/$(ISO_NAME)
-#	sleep 5
 	$(CP) scripts/$(ISO_NAME) .
 	qemu-system-i386 -cdrom $<
 
