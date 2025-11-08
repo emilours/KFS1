@@ -8,6 +8,7 @@ ISO_PATH := iso
 ISO_NAME := the_chosen_one.iso
 BOOT_PATH := $(ISO_PATH)/boot
 GRUB_PATH := $(BOOT_PATH)/grub
+DOCKER_CONTAINER := kfs_isobuilder
 
 .PHONY: all clean bootloader kernel linker iso run fclean re
 all: bootloader kernel linker iso run
@@ -48,9 +49,8 @@ iso: $(BIN)
 	./scripts/check_multiboot.sh
 # Creates a bootable ISO file that we can mount in a virtual machine (QEMU)
 #	grub-mkrescue -o $(ISO_NAME) $(ISO_PATH)
-# compose waits for the container to finish building before proceeding and
-# --abort-on-container-exit stops all containers if one exits
-	docker compose -f docker-compose.yaml up --build --abort-on-container-exit
+	docker compose -f docker-compose.yaml up -d --build
+	docker wait $(DOCKER_CONTAINER)
 
 run: iso
 #	sleep 5
