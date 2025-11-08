@@ -1,4 +1,4 @@
-#include "../includes/kfs1.h"
+#include "../../includes/kfs1.h"
 
 /* VGA text mode constants */
 #define VGA_WIDTH 80

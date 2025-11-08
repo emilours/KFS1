@@ -30,10 +30,10 @@ bootloader: boot.asm
 # - Contains your actual kernel logic (memory management, process handling, etc.)
 # -m32 ensures 32-bit compatibility with your bootloader
 # -c creates an object file (not an executable) since it needs special linking
-kernel: kernel/kernel.c kernel/drivers/screen.c kernel/lib/string.c
-	$(CC) $(CFLAGS) kernel/kernel.c -o kernel.o
-	$(CC) $(CFLAGS) kernel/drivers/screen.c -o screen.o
-	$(CC) $(CFLAGS) kernel/lib/string.c -o string.o
+kernel: kernel_dir/kernel.c kernel_dir/drivers/screen.c kernel_dir/lib/string.c
+	$(CC) $(CFLAGS) kernel_dir/kernel.c -o kernel.o
+	$(CC) $(CFLAGS) kernel_dir/drivers/screen.c -o screen.o
+	$(CC) $(CFLAGS) kernel_dir/lib/string.c -o string.o
 
 # Linking everything together:
 # - Memory layout control: Kernels need to be loaded at specific memory addresses
@@ -41,7 +41,7 @@ kernel: kernel/kernel.c kernel/drivers/screen.c kernel/lib/string.c
 # - No standard library: Regular executables expect libc, kernels run bare metal
 # - Custom entry point: could be main() or wherever your bootloader jumps
 linker: linker.ld boot.o kernel.o screen.o string.o
-	ld -m elf_i386 -T linker.ld -o kernel boot.o kernel.o screen.o string.o
+	ld -m elf_i386 -T linker.ld -o $(BIN) boot.o kernel.o screen.o string.o
 
 # Create a bootable ISO image using GRUB
 iso: $(BIN)

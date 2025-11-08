@@ -2,7 +2,7 @@
 #define KFS1_H
 
 # include "string.h"
-# include "stdlib.h"
 # include "screen.h"
 
+#include <stddef.h>
 #endif 

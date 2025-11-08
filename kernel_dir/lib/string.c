@@ -1,5 +1,5 @@
 // itoa, atoi
-#include "../includes/kfs1.h"
+#include "../../includes/kfs1.h"
 
 int	ft_atoi(const char *str)
 {

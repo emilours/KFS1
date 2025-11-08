@@ -1,7 +1,6 @@
-#ifndef LIB_H
-#define LIB_H
-
-# include "kfs1.h"
+#ifndef STRING_H
+#define STRING_H
+#include <stddef.h>
 
 int     ft_atoi(const char *str);
 void    *ft_memset(void *s, int c, size_t n);
