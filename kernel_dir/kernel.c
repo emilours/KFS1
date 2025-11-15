@@ -2,5 +2,12 @@
 
 void main() {
     screen_clear();
-    screen_print("42", 0, 0, 0x07);
+    // screen_print("42", 0, 0, 0x07);
+    // ft_printf("Hello, World!\n");
+    // ft_printf("Decimal: %d\n", -12345);
+    // ft_printf("Unsigned: %u\n", 12345U);
+    // ft_printf("Hexadecimal: %x\n", 0xABCD);
+    // ft_printf("String: %s\n", "Test string");
+    // ft_printf("Character: %c\n", 'A');
+    ft_printf("%d", 42);
 }

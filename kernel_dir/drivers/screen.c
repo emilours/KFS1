@@ -42,3 +42,36 @@ void screen_print(const char *str, int x, int y, unsigned char color) {
         i++;
     }
 }
+
+// show a character at the current cursor position
+void screen_putc(char c) {
+    if (c == '\n') {
+        cursor_x = 0;
+        cursor_y++;
+    } else {
+        screen_putchar(c, cursor_x, cursor_y, current_color);
+        cursor_x++;
+    }
+    
+    // handle line wrap
+    if (cursor_x >= VGA_WIDTH) {
+        cursor_x = 0;
+        cursor_y++;
+    }
+    
+    // If we go beyond the height, stay at the bottom
+    // (for now, no scroll)
+    if (cursor_y >= VGA_HEIGHT) {
+        cursor_y = VGA_HEIGHT - 1;
+        cursor_x = 0;
+    }
+}
+
+// Show a string at the current cursor position
+void screen_puts(const char *s) {
+    int i = 0;
+    while (s[i] != '\0') {
+        screen_putc(s[i]);
+        i++;
+    }
+}
