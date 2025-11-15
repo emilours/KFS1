@@ -75,3 +75,7 @@ void screen_puts(const char *s) {
         i++;
     }
 }
+
+void screen_set_color(unsigned char color) {
+    current_color = color;
+}

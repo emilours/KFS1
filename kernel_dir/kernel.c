@@ -10,4 +10,7 @@ void main() {
     // ft_printf("String: %s\n", "Test string");
     // ft_printf("Character: %c\n", 'A');
     ft_printf("%d", 42);
+    printk_info("Kernel initialized successfully.\n");
+    printk_warn("This is a warning message.\n");
+    printk_err("This is an error message.\n");
 }

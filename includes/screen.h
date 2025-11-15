@@ -17,5 +17,6 @@ void screen_putchar(char c, int x, int y, unsigned char color);
 void screen_print(const char *str, int x, int y, unsigned char color);
 void screen_putc(char c);
 void screen_puts(const char *s);
+void screen_set_color(unsigned char color);
 
 #endif
