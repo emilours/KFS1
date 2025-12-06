@@ -13,4 +13,10 @@ void main() {
     printk_info("Kernel initialized successfully.\n");
     printk_warn("This is a warning message.\n");
     printk_err("This is an error message.\n");
+
+    printk_info("keyboard test start\n");
+    keyboard_init();
+    while (1) {
+        keyboard_poll_once();
+    }
 }
