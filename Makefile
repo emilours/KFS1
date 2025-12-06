@@ -31,18 +31,21 @@ bootloader: boot.asm
 # - Contains your actual kernel logic (memory management, process handling, etc.)
 # -m32 ensures 32-bit compatibility with your bootloader
 # -c creates an object file (not an executable) since it needs special linking
-kernel: kernel_dir/kernel.c kernel_dir/drivers/screen.c kernel_dir/lib/string.c
+kernel: kernel_dir/kernel.c kernel_dir/drivers/screen.c kernel_dir/lib/string.c kernel_dir/lib/stdio.c kernel_dir/lib/stdlib.c kernel_dir/drivers/keyboard.c
 	$(CC) $(CFLAGS) kernel_dir/kernel.c -o kernel.o
 	$(CC) $(CFLAGS) kernel_dir/drivers/screen.c -o screen.o
 	$(CC) $(CFLAGS) kernel_dir/lib/string.c -o string.o
+	$(CC) $(CFLAGS) kernel_dir/lib/stdio.c -o stdio.o
+	$(CC) $(CFLAGS) kernel_dir/lib/stdlib.c -o stdlib.o
+	$(CC) $(CFLAGS) kernel_dir/drivers/keyboard.c -o keyboard.o
 
 # Linking everything together:
 # - Memory layout control: Kernels need to be loaded at specific memory addresses
 # - Section ordering: Bootloader code must come first, kernel code after
 # - No standard library: Regular executables expect libc, kernels run bare metal
 # - Custom entry point: could be main() or wherever your bootloader jumps
-linker: linker.ld boot.o kernel.o screen.o string.o
-	ld -m elf_i386 -T linker.ld -o $(BIN) boot.o kernel.o screen.o string.o
+linker: linker.ld boot.o kernel.o screen.o string.o stdio.o stdlib.o keyboard.o
+	ld -m elf_i386 -T linker.ld -o $(BIN) boot.o kernel.o screen.o string.o stdio.o stdlib.o keyboard.o
 
 # Create a bootable ISO image using GRUB
 iso: $(BIN)
