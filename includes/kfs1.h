@@ -13,4 +13,6 @@
 #define printk(msg)       ft_printf(msg);
 
 #include <stddef.h>
+#include <stdint.h>
+
 #endif
