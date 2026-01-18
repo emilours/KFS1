@@ -124,3 +124,54 @@ void screen_puts(const char *s) {
 void screen_set_color(unsigned char color) {
     current_color = color;
 }
+
+
+void keyboard_handle_arrow_up(void) {
+    if (cursor_y > 0) {
+        cursor_y--;
+        vga_update_cursor();
+    }
+}
+
+void keyboard_handle_arrow_down(void) {
+    if (cursor_y < VGA_HEIGHT - 1) {
+        cursor_y++;
+        vga_update_cursor();
+    } else {
+        vga_scroll();
+    }
+}
+
+void keyboard_handle_arrow_left(void) {
+    if (cursor_x > 0) {
+        cursor_x--;
+    } else if (cursor_y > 0) {
+        cursor_y--;
+        cursor_x = VGA_WIDTH - 1;
+    }
+    vga_update_cursor();
+}
+
+void keyboard_handle_arrow_right(void) {
+    if (cursor_x < VGA_WIDTH - 1) {
+        cursor_x++;
+    } else if (cursor_y < VGA_HEIGHT - 1) {
+        cursor_x = 0;
+        cursor_y++;
+    }
+    vga_update_cursor();
+}
+
+
+void keyboard_handle_page_up(void) {
+    // Scroll up one page
+    if (cursor_y > 0) cursor_y = 0;
+    vga_update_cursor();
+}
+
+void keyboard_handle_page_down(void) {
+    // Scroll down one page
+    cursor_y = VGA_HEIGHT - 1;
+    vga_scroll();
+    vga_update_cursor();
+}
