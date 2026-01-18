@@ -65,6 +65,18 @@ static unsigned char keyboard_read_scancode() {
     return inb(0x60);
 }
 
+static int extended_scancode = 0;  // Track E0 prefix
+
+// Arrow key scancodes (after E0 prefix)
+#define SCANCODE_UP    0x48
+#define SCANCODE_DOWN  0x50
+#define SCANCODE_LEFT  0x4B
+#define SCANCODE_RIGHT 0x4D
+
+// Page Up/Down for scrolling (optional)
+#define SCANCODE_PGUP  0x49
+#define SCANCODE_PGDN  0x51
+
 /* Poll once: if a scancode is available, handle it and call keyboard_press_key for printable chars.
  * Returns 1 if a scancode was processed, 0 otherwise.
  */
@@ -74,6 +86,12 @@ int keyboard_poll_once(void) {
 
     unsigned char sc = keyboard_read_scancode();
 
+        /* Handle extended scancode prefix (0xE0) */
+    if (sc == 0xE0) {
+        extended_scancode = 1;
+        return 1;
+    }
+
     /* Key release has bit 7 set (0x80). Base scancode is sc & 0x7F */
     int released = sc & 0x80;
     unsigned char code = sc & 0x7F;
@@ -82,11 +100,38 @@ int keyboard_poll_once(void) {
     if (code == 0x2A || code == 0x36) {
         if (released) shift_down = 0;
         else shift_down = 1;
+        extended_scancode = 0;
         return 1;
     }
 
     if (released) {
-        /* ignore releases for other keys for now */
+        extended_scancode = 0;
+        return 1;
+    }
+
+    if (extended_scancode) {
+        extended_scancode = 0;
+
+        switch (code) {
+            case SCANCODE_UP:
+                keyboard_handle_arrow_up();
+                return 1;
+            case SCANCODE_DOWN:
+                keyboard_handle_arrow_down();
+                return 1;
+            case SCANCODE_LEFT:
+                keyboard_handle_arrow_left();
+                return 1;
+            case SCANCODE_RIGHT:
+                keyboard_handle_arrow_right();
+                return 1;
+            case SCANCODE_PGUP:
+                keyboard_handle_page_up();
+                return 1;
+            case SCANCODE_PGDN:
+                keyboard_handle_page_down();
+                return 1;
+        }
         return 1;
     }
 

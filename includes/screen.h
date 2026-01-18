@@ -20,4 +20,11 @@ void screen_putc(char c);
 void screen_puts(const char *s);
 void screen_set_color(unsigned char color);
 
+void keyboard_handle_arrow_up(void);
+void keyboard_handle_arrow_down(void);
+void keyboard_handle_arrow_left(void);
+void keyboard_handle_arrow_right(void);
+void keyboard_handle_page_up(void);
+void keyboard_handle_page_down(void);
+
 #endif
