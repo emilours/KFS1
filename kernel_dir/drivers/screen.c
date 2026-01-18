@@ -3,7 +3,12 @@
 /* VGA text mode constants */
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
+// #define SCROLL_BUFFER_LINES 100
 //#define VGA_MEMORY 0xB8000
+
+// static uint16_t scroll_buffer[SCROLL_BUFFER_LINES][VGA_WIDTH];
+// static int scroll_buffer_start = 0;
+// static int scroll_buffer_count = 0;
 
 // Pointers to video memory
 static unsigned short *video_memory = (unsigned short *)VGA_MEMORY;
