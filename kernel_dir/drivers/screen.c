@@ -99,16 +99,17 @@ void screen_clear() {
 /* Scroll all screens up by one line (keep each buffer consistent) */
 static void vga_scroll(void) {
     for (int s = 0; s < NUM_SCREENS; s++) {
-        for (int y = 1; y < VGA_HEIGHT; y++) {
+        /* Scroller seulement les lignes 0 à VGA_HEIGHT-2 */
+        for (int y = 1; y < VGA_HEIGHT - 1; y++) {  // ← -1 pour protéger dernière ligne
             for (int x = 0; x < VGA_WIDTH; x++) {
                 int dst = (y - 1) * VGA_WIDTH + x;
                 int src = y * VGA_WIDTH + x;
                 screens[s][dst] = screens[s][src];
             }
         }
-        /* clear last line */
+        /* clear avant-dernière ligne (VGA_HEIGHT-2) */
         for (int x = 0; x < VGA_WIDTH; x++) {
-            int pos = (VGA_HEIGHT - 1) * VGA_WIDTH + x;
+            int pos = (VGA_HEIGHT - 2) * VGA_WIDTH + x;  // ← -2 au lieu de -1
             screens[s][pos] = (uint16_t)screen_color[s] << 8 | ' ';
         }
     }
@@ -118,7 +119,7 @@ static void vga_scroll(void) {
         video_memory[i] = screens[active_screen][i];
     }
 
-    cursor_y = VGA_HEIGHT - 1;
+    cursor_y = VGA_HEIGHT - 2;  // ← -2 pour rester avant la ligne de status
 }
 
 /* Show a character at a given position with a given color */
@@ -140,7 +141,10 @@ void screen_print(const char *str, int x, int y, unsigned char color) {
     }
 }
 
-/* show a character at the current cursor position */
+/* Modifiez VGA_HEIGHT effectif pour l'utilisateur */
+#define VGA_HEIGHT_USABLE (VGA_HEIGHT - 1)  /* Réserver la dernière ligne */
+
+/* Dans screen_putc(), remplacez VGA_HEIGHT par VGA_HEIGHT_USABLE */
 void screen_putc(char c) {
     if (c == '\n') {
         cursor_x = 0;
@@ -164,14 +168,12 @@ void screen_putc(char c) {
         cursor_y++;
     }
 
-    /* Scroll when reaching bottom */
-    if (cursor_y >= VGA_HEIGHT) {
-        /* ensure the active screen's color is up-to-date */
+    /* Scroll when reaching bottom (mais pas la dernière ligne) */
+    if (cursor_y >= VGA_HEIGHT_USABLE) {  // ← CHANGEMENT ICI
         screen_color[active_screen] = current_color;
         vga_scroll();
-    } else {
-        /* update only the modified cell in VRAM already done in screen_putchar */
-        for (int i = 0; i < 0; i++); /* no-op to keep compact */
+        /* Redessiner la barre après scroll */
+        screen_display_shortcuts();
     }
 
     vga_update_cursor();
@@ -277,7 +279,7 @@ void screen_display_shortcuts(void) {
     int old_y = cursor_y;
     unsigned char old_color = current_color;
     
-    screen_print("Ctrl+1:Main  Ctrl+2:Logs  Ctrl+3:Monitor  Ctrl+4:Debug", 
+    screen_print("Alt+1:Main  Alt+2:Logs  Alt+3:Monitor  Alt+4:Debug", 
                  2, VGA_HEIGHT - 1, 0x70);
     
     cursor_x = old_x;

@@ -87,9 +87,8 @@ static int extended_scancode = 0;  // Track E0 prefix
 #define SCANCODE_PGDN  0x51
 
 int keyboard_poll_once(void) {
-    if (!keyboard_scancode_available()) {
+    if (!keyboard_scancode_available())
         return 0;
-    }
 
     unsigned char sc = keyboard_read_scancode();
 
@@ -202,28 +201,5 @@ int keyboard_poll_once(void) {
         }
     }
     
-    /* Ctrl/Alt + number quick-switch (1..4) -> scancodes 0x02..0x05 */
-    if ((ctrl_down || alt_down) && (code >= 0x02 && code <= 0x05)) {
-        int idx = code - 0x02; /* 0x02->0, 0x03->1, 0x04->2, 0x05->3 */
-        if (idx >= 0 && idx < NUM_SCREENS) {
-            screen_switch(idx);
-            return 1;
-        }
-    }
-
-    char i = 0;
-    if (shift_down) i = scancode_map_shift[code];
-    else i = scancode_map[code];
-
-    if (i) {
-        keyboard_press_key(i);
-    } else {
-        /* Non-printable, handle Enter / Backspace */
-        if (code == 0x1C) { /* Enter */
-            keyboard_press_key('\n');
-        } else if (code == 0x0E) { /* Backspace */
-            keyboard_press_key('\b');
-        }
-    }
     return 1;
 }
