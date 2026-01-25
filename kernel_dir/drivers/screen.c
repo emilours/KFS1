@@ -3,8 +3,8 @@
 /* VGA text mode constants */
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
-// #define SCROLL_BUFFER_LINES 100
-//#define VGA_MEMORY 0xB8000
+
+#define VGA_HEIGHT_USABLE (VGA_HEIGHT - 1)
 
 // Pointers to video memory
 static volatile uint16_t *video_memory = VGA_MEMORY;
@@ -17,8 +17,6 @@ static int active_screen = 0;
 static int screen_cursor_x[NUM_SCREENS];
 static int screen_cursor_y[NUM_SCREENS];
 static unsigned char screen_color[NUM_SCREENS];
-
-/* Global variables reflect the active screen state */
 static int cursor_x = 0;
 static int cursor_y = 0;
 static unsigned char current_color = 0x07; // default white on black
@@ -69,12 +67,11 @@ void screen_switch(int id) {
 
     vga_update_cursor();
     
-    /* Afficher les indicateurs après le switch */
     screen_display_indicator();
     screen_display_shortcuts();
 }
 
-/* Clear all screens and VRAM */
+/* Clear all screens */
 void screen_clear() {
     uint16_t blank = ' ' | (0x07 << 8);
     for (int s = 0; s < NUM_SCREENS; s++) {
@@ -86,7 +83,6 @@ void screen_clear() {
         screen_color[s] = 0x07;
     }
 
-    /* set VRAM from active buffer (which we just initialized) */
     for (int i = 0; i < VGA_WIDTH * VGA_HEIGHT; i++) {
         video_memory[i] = screens[active_screen][i];
     }
@@ -142,15 +138,23 @@ void screen_print(const char *str, int x, int y, unsigned char color) {
     }
 }
 
-/* Modifiez VGA_HEIGHT effectif pour l'utilisateur */
-#define VGA_HEIGHT_USABLE (VGA_HEIGHT - 1)  /* Réserver la dernière ligne */
-
-/* Dans screen_putc(), remplacez VGA_HEIGHT par VGA_HEIGHT_USABLE */
 void screen_putc(char c) {
     if (c == '\n') {
         cursor_x = 0;
         cursor_y++;
-    } else if (c == '\b') {
+    } else if (c == '\t') {
+        /* Tab = aligner sur le prochain multiple de 4 (ou 8) */
+        int spaces = 4 - (cursor_x % 4);  // Avancer de 4 espaces max
+        for (int i = 0; i < spaces; i++) {
+            screen_putchar(' ', cursor_x, cursor_y, current_color);
+            cursor_x++;
+            if (cursor_x >= VGA_WIDTH) {
+                cursor_x = 0;
+                cursor_y++;
+            }
+        }
+    }
+    else if (c == '\b') {
         if (cursor_x > 0) {
             cursor_x--;
         } else if (cursor_y > 0) {
@@ -163,17 +167,15 @@ void screen_putc(char c) {
         cursor_x++;
     }
 
-    /* Line wrap */
     if (cursor_x >= VGA_WIDTH) {
         cursor_x = 0;
         cursor_y++;
     }
 
-    /* Scroll when reaching bottom (mais pas la dernière ligne) */
-    if (cursor_y >= VGA_HEIGHT_USABLE) {  // ← CHANGEMENT ICI
+    /* Scroll when reaching bottom */
+    if (cursor_y >= VGA_HEIGHT_USABLE) {
         screen_color[active_screen] = current_color;
         vga_scroll();
-        /* Redessiner la barre après scroll */
         screen_display_shortcuts();
     }
 
@@ -242,7 +244,6 @@ void keyboard_handle_page_down(void) {
     vga_update_cursor();
 }
 
-/* Affiche l'indicateur d'écran actif en haut à droite */
 void screen_display_indicator(void) {
     /* Sauvegarder l'état actuel */
     int old_x = cursor_x;
@@ -274,7 +275,6 @@ void screen_display_indicator(void) {
     current_color = old_color;
 }
 
-/* Affiche la barre de raccourcis en bas de l'écran */
 void screen_display_shortcuts(void) {
     int old_x = cursor_x;
     int old_y = cursor_y;

@@ -13,7 +13,6 @@
 #define COLOR_RED 4
 #define COLOR_YELLOW 14
 
-/* number of virtual screens (Ctrl/Alt + 1..4) */
 #define NUM_SCREENS 4
 
 void screen_clear();
@@ -23,7 +22,6 @@ void screen_putc(char c);
 void screen_puts(const char *s);
 void screen_set_color(unsigned char color);
 
-/* switch to virtual screen id (0..NUM_SCREENS-1) */
 void screen_switch(int screen_number);
 
 void keyboard_handle_arrow_up(void);
@@ -33,7 +31,6 @@ void keyboard_handle_arrow_right(void);
 void keyboard_handle_page_up(void);
 void keyboard_handle_page_down(void);
 
-/* À ajouter à la fin de votre screen.h */
 void screen_display_indicator(void);
 void screen_display_shortcuts(void);
 

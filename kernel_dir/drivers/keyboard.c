@@ -1,5 +1,22 @@
 #include "../../includes/kfs1.h"
 
+static int extended_scancode = 0;
+
+// Arrow key scancodes
+#define SCANCODE_UP    0x48
+#define SCANCODE_DOWN  0x50
+#define SCANCODE_LEFT  0x4B
+#define SCANCODE_RIGHT 0x4D
+
+#define SCANCODE_F1  0x3B
+#define SCANCODE_F2  0x3C
+#define SCANCODE_F3  0x3D
+#define SCANCODE_F4  0x3E
+
+// Page Up/Down for scrolling
+#define SCANCODE_PGUP  0x49
+#define SCANCODE_PGDN  0x51
+
 /* Very small keyboard driver in polling mode using scancode set 1.
  * - provides keyboard_init(), keyboard_shutdown(), keyboard_poll_once()
  * - calls keyboard_press_key(char) when a printable key is pressed
@@ -69,22 +86,6 @@ static unsigned char keyboard_read_scancode() {
     return inb(0x60);
 }
 
-static int extended_scancode = 0;  // Track E0 prefix
-
-// Arrow key scancodes (after E0 prefix)
-#define SCANCODE_UP    0x48
-#define SCANCODE_DOWN  0x50
-#define SCANCODE_LEFT  0x4B
-#define SCANCODE_RIGHT 0x4D
-
-#define SCANCODE_F1  0x3B
-#define SCANCODE_F2  0x3C
-#define SCANCODE_F3  0x3D
-#define SCANCODE_F4  0x3E
-
-// Page Up/Down for scrolling (optional)
-#define SCANCODE_PGUP  0x49
-#define SCANCODE_PGDN  0x51
 
 int keyboard_poll_once(void) {
     if (!keyboard_scancode_available())
@@ -92,19 +93,16 @@ int keyboard_poll_once(void) {
 
     unsigned char sc = keyboard_read_scancode();
 
-    /* Handle extended scancode prefix (0xE0) */
     if (sc == 0xE0) {
         extended_scancode = 1;
         return 1;
     }
 
-    /* Key release has bit 7 set (0x80). Base scancode is sc & 0x7F */
     int released = sc & 0x80;
     unsigned char code = sc & 0x7F;
 
-    /* ===== IMPORTANT: Handle modifier keys (Shift, Ctrl, Alt) ===== */
+    /* Handle modifier keys (Shift, Ctrl, Alt) */
     
-    /* Handle Shift press/release (left shift 0x2A, right shift 0x36) */
     if (code == 0x2A || code == 0x36) {
         if (released) shift_down = 0;
         else shift_down = 1;
@@ -112,7 +110,6 @@ int keyboard_poll_once(void) {
         return 1;
     }
 
-    /* Handle Ctrl (0x1D) and Alt (0x38) */
     if (code == 0x1D) { 
         if (released) ctrl_down = 0; 
         else ctrl_down = 1; 
@@ -127,13 +124,13 @@ int keyboard_poll_once(void) {
         return 1; 
     }
 
-    /* ===== Ignore key release for other keys ===== */
+    /* Ignore key release for other keys */
     if (released) {
         extended_scancode = 0;
         return 1;
     }
 
-    /* ===== Handle F1-F4 for screen switching (BEFORE extended check) ===== */
+    /* Handle F1-F4 for screen switching */
     if (code >= SCANCODE_F1 && code <= SCANCODE_F4) {
         int idx = code - SCANCODE_F1;
         if (idx < NUM_SCREENS) {
@@ -143,7 +140,7 @@ int keyboard_poll_once(void) {
         return 1;
     }
 
-    /* ===== Handle extended scancodes (arrows, etc.) ===== */
+    /* Handle extended scancodes (arrows, etc.) */
     if (extended_scancode) {
         extended_scancode = 0;
 
@@ -174,7 +171,6 @@ int keyboard_poll_once(void) {
         return 1;
     }
 
-    /* ===== Alt/Ctrl + number (1-4) for screen switching (BACKUP) ===== */
     if ((ctrl_down || alt_down) && (code >= 0x02 && code <= 0x05)) {
         int idx = code - 0x02; /* 0x02->0, 0x03->1, 0x04->2, 0x05->3 */
         if (idx >= 0 && idx < NUM_SCREENS) {
@@ -183,7 +179,7 @@ int keyboard_poll_once(void) {
         }
     }
 
-    /* ===== Handle printable characters ===== */
+    /* Handle printable characters */
     char c = 0;
     if (shift_down) 
         c = scancode_map_shift[code];
