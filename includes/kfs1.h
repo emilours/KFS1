@@ -1,6 +1,9 @@
 #ifndef KFS1_H
 #define KFS1_H
 
+#include <stddef.h>
+#include <stdint.h>
+
 # include "string.h"
 # include "screen.h"
 # include "stdio.h"
@@ -11,8 +14,5 @@
 #define printk_warn(msg)  screen_set_color(COLOR_YELLOW); ft_printf(msg); screen_set_color(COLOR_WHITE);
 #define printk_info(msg)  ft_printf(msg);
 #define printk(msg)       ft_printf(msg);
-
-#include <stddef.h>
-#include <stdint.h>
 
 #endif
