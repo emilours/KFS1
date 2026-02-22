@@ -67,7 +67,6 @@ void screen_switch(int id) {
 
     vga_update_cursor();
     
-    screen_display_indicator();
     screen_display_shortcuts();
 }
 
@@ -244,43 +243,12 @@ void keyboard_handle_page_down(void) {
     vga_update_cursor();
 }
 
-void screen_display_indicator(void) {
-    /* Sauvegarder l'état actuel */
-    int old_x = cursor_x;
-    int old_y = cursor_y;
-    unsigned char old_color = current_color;
-    
-    /* Afficher l'indicateur */
-    char buffer[20];
-    int i = 0;
-    buffer[i++] = ' ';
-    buffer[i++] = 'S';
-    buffer[i++] = 'c';
-    buffer[i++] = 'r';
-    buffer[i++] = 'e';
-    buffer[i++] = 'e';
-    buffer[i++] = 'n';
-    buffer[i++] = ' ';
-    buffer[i++] = '1' + active_screen;
-    buffer[i++] = '/';
-    buffer[i++] = '0' + NUM_SCREENS;
-    buffer[i++] = ' ';
-    buffer[i] = '\0';
-    
-    screen_print(buffer, VGA_WIDTH - 12, 0, 0x70); /* Noir sur gris clair */
-    
-    /* Restaurer l'état */
-    cursor_x = old_x;
-    cursor_y = old_y;
-    current_color = old_color;
-}
-
 void screen_display_shortcuts(void) {
     int old_x = cursor_x;
     int old_y = cursor_y;
     unsigned char old_color = current_color;
     
-    screen_print("Alt+1:Main  Alt+2:Logs  Alt+3:Monitor  Alt+4:Debug", 
+    screen_print("Ctrl+F1:Main  Ctrl+F2:Logs  Ctrl+F3:Monitor  Ctrl+F4:Debug", 
                  2, VGA_HEIGHT - 1, 0x70);
     
     cursor_x = old_x;
